@@ -18,11 +18,14 @@ import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.ui.SubtitleView;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.controller.PlayerController;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.List;
 
 public class SubtitleManager implements TextOutput, OnDataChange {
@@ -32,6 +35,7 @@ public class SubtitleManager implements TextOutput, OnDataChange {
     private final List<SubtitleStyle> mSubtitleStyles = new ArrayList<>();
     private final AppPrefs mPrefs;
     private final PlayerData mPlayerData;
+    private final PlayerController mPlayerController;
     private CharSequence subsBuffer;
 
     public static class SubtitleStyle {
@@ -56,11 +60,12 @@ public class SubtitleManager implements TextOutput, OnDataChange {
         }
     }
 
-    public SubtitleManager(Activity activity, int subViewId) {
+    public SubtitleManager(Activity activity, int subViewId, PlayerController playerController) {
         mContext = activity;
         mSubtitleView = activity.findViewById(subViewId);
         mPrefs = AppPrefs.instance(activity);
         mPlayerData = PlayerData.instance(activity);
+        mPlayerController = playerController;
         mPlayerData.setOnChange(this);
         configureSubtitleView();
     }
@@ -148,7 +153,7 @@ public class SubtitleManager implements TextOutput, OnDataChange {
                 new CaptionStyleCompat(textColor,
                         backgroundColor, Color.TRANSPARENT,
                         subtitleStyle.captionStyle,
-                        outlineColor, Typeface.DEFAULT_BOLD);
+                        outlineColor, getTypeface(Typeface.DEFAULT_BOLD));
         mSubtitleView.setStyle(style);
 
         float textSize = getTextSizePx();
@@ -167,7 +172,7 @@ public class SubtitleManager implements TextOutput, OnDataChange {
                     new CaptionStyleCompat(userStyle.foregroundColor,
                             userStyle.backgroundColor, VERSION.SDK_INT >= 21 ? userStyle.windowColor : Color.TRANSPARENT,
                             userStyle.edgeType,
-                            userStyle.edgeColor, userStyle.getTypeface());
+                            userStyle.edgeColor, getTypeface(userStyle.getTypeface()));
             mSubtitleView.setStyle(style);
 
             float textSizePx = getTextSizePx();
@@ -178,5 +183,22 @@ public class SubtitleManager implements TextOutput, OnDataChange {
     private float getTextSizePx() {
         float textSizePx = mSubtitleView.getContext().getResources().getDimension(R.dimen.subtitle_text_size);
         return textSizePx * mPlayerData.getSubtitleScale();
+    }
+
+    private Typeface getTypeface(Typeface defaultTypeface) {
+        if (mPlayerController != null) {
+            FormatItem formatItem = mPlayerController.getSubtitleFormat();
+            if (formatItem != null) {
+                String lang = formatItem.getLanguage();
+                if (lang != null && lang.toLowerCase(Locale.ROOT).startsWith("th")) {
+                    try {
+                        return Typeface.createFromAsset(mContext.getAssets(), "NotoSansThai-Regular.ttf");
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+
+        return defaultTypeface != null ? defaultTypeface : Typeface.DEFAULT;
     }
 }
