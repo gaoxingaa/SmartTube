@@ -464,7 +464,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     private void createSubtitleManager() {
-        mSubtitleManager = new SubtitleManager(getActivity(), R.id.leanback_subtitles);
+        mSubtitleManager = new SubtitleManager(getActivity(), R.id.leanback_subtitles, mExoPlayerController);
 
         // subs renderer
         if (mPlayer.getTextComponent() != null) {
