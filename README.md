@@ -216,7 +216,7 @@ SmartTube is developed single-handedly; there is no larger team or company behin
 To build and install debug version, run these commands:
 
 ```
-git clone https://github.com/yuliskov/SmartTube.git
+git clone https://github.com/gaoxingaa/SmartTube.git
 cd SmartTube
 git submodule update --init
 adb connect <device_ip_address>
@@ -474,4 +474,5 @@ A: no, this is technically not possible. Only the preinstalled app manager (usua
 ### Q: Can I whitelist ads on some channels?
 
 A: no, this is not possible. SmartTube does not have any code to display ads. Adding this functionality would actually take time and effort, which is instead spent on adding useful features and fixing bugs.
+
 
